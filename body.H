@@ -1,41 +1,39 @@
-# ifndef BODY_H
-# define BODY_H
+#ifndef BODY_H
+#define BODY_H
 
-# include <QPoint>
-# include <QColor>
-# include <QPainter>
-# include <QList>
+#include <QPoint>
+#include <QColor>
+#include <QPainter>
+#include <QList>
 
 class Body
 {
 public:
-  Body * parent;
+  Body* parent{nullptr};
 
   QList<Body> children_list;
 
-  QPoint position;
+  QPointF position{0.f, 0.f};
 
-  QColor color;
+  QColor color{0, 0, 0};
 
-  double rot_angle;
-  double rot_speed;
+  float rot_angle{0.f};
+  float rot_speed{0.f};
 
-  double rot_angle_respect_parent;
-  double rot_speed_respect_parent;
+  float rot_angle_respect_parent{0.f};
+  float rot_speed_respect_parent{0.f};
 
-  double distance_with_parent;
+  float distance_with_parent{0.f};
 
-  double scale;
+  float scale{1.f};
 
-  Body();
+  Body() = default;
 
-  void add_child(const Body &);
+  void add_child(const Body& body) noexcept;
 
-  void compute_new_angle(const unsigned long long &);
+  void update(float dt) noexcept;
 
-  void compute_new_angle_respect_parent(const unsigned long long &);
-
-  void draw(QPainter &, const unsigned long long &);
+  void draw(QPainter& paiter) const noexcept;
 };
 
 #endif // BODY_H

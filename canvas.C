@@ -1,4 +1,4 @@
-# include <canvas.H>
+#include <canvas.H>
 
 Canvas::Canvas(QWidget * parent)
   : QWidget(parent), running(false)
@@ -7,14 +7,14 @@ Canvas::Canvas(QWidget * parent)
 
   body.position.setX(350);
   body.position.setY(350);
+  body.color = Qt::white;
   body.scale = 2.0;
-  body.rot_angle = 45;
+  body.rot_angle = 0;
   body.rot_speed = 10;
 
   body_list.push_back(body);
 
-  Body & root = body_list.back();
-
+  Body& root = body_list.back();
   body.parent = &root;
   body.distance_with_parent = 80;
   body.scale = 0.25;
@@ -23,11 +23,9 @@ Canvas::Canvas(QWidget * parent)
   body.rot_angle_respect_parent = 0;
   body.rot_speed = 30;
   body.rot_speed_respect_parent = 40;
-
   root.add_child(body);
 
-  Body & child_1 = root.children_list.back();
-
+  Body& child_1 = root.children_list.back();
   body.parent = &child_1;
   body.distance_with_parent = 50;
   body.scale = 0.5;
@@ -36,7 +34,6 @@ Canvas::Canvas(QWidget * parent)
   body.rot_angle_respect_parent = 0;
   body.rot_speed = 50;
   body.rot_speed_respect_parent = 60;
-
   child_1.add_child(body);
 
   body.parent = &root;
@@ -47,11 +44,9 @@ Canvas::Canvas(QWidget * parent)
   body.rot_angle_respect_parent = 0;
   body.rot_speed = 20;
   body.rot_speed_respect_parent = 15;
-
   root.add_child(body);
 
   Body & child_2 = root.children_list.back();
-
   body.parent = &child_2;
   body.distance_with_parent = 50;
   body.scale = 0.5;
@@ -60,7 +55,6 @@ Canvas::Canvas(QWidget * parent)
   body.rot_angle_respect_parent = 0;
   body.rot_speed = 35;
   body.rot_speed_respect_parent = 25;
-
   child_2.add_child(body);
 
   body.parent = &child_2;
@@ -71,31 +65,48 @@ Canvas::Canvas(QWidget * parent)
   body.rot_angle_respect_parent = 90;
   body.rot_speed = 75;
   body.rot_speed_respect_parent = 65;
-
   child_2.add_child(body);
 
   resize(700, 700);
 
-  connect(&timer, SIGNAL(timeout()), this, SLOT(update_time()));
-  timer.setInterval(33);
+  connect(&timer, SIGNAL(timeout()), this, SLOT(step()));
+  timer.setInterval(60);
 }
 
-void Canvas::update_time()
+void Canvas::step()
 {
+  if (!running)
+    {
+      return;
+    }
+
+  float dt = elapsed_timer.elapsed() / 1000.f;
+  update(dt);
   repaint();
+  elapsed_timer.start();
 }
 
-void Canvas::paintEvent(QPaintEvent *)
+void Canvas::update(float dt)
+{
+  for (Body& body: body_list)
+    {
+      body.update(dt);
+    }
+}
+
+void Canvas::draw(QPainter& painter)
+{
+  for (Body & body : body_list)
+    {
+      body.draw(painter);
+    }
+}
+
+void Canvas::paintEvent(QPaintEvent*)
 {
   QPainter painter(this);
   painter.fillRect(0, 0, width(), height(), Qt::black);
-
-  int dt = time.elapsed();
-
-  for (Body & body : body_list)
-    body.draw(painter, dt);
-
-  time.start();
+  draw(painter);
 }
 
 void Canvas::keyPressEvent(QKeyEvent *)
@@ -109,7 +120,7 @@ void Canvas::keyPressEvent(QKeyEvent *)
     {
       running = true;
       timer.start();
-      time.start();
+      elapsed_timer.start();
     }
 }
 

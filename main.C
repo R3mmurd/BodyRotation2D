@@ -1,5 +1,5 @@
-# include <QApplication>
-# include <canvas.H>
+#include <QApplication>
+#include <canvas.H>
 
 int main(int argc, char * argv[])
 {

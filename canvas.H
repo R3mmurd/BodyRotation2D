@@ -1,11 +1,11 @@
-# ifndef CANVAS_H
-# define CANVAS_H
+#ifndef CANVAS_H
+#define CANVAS_H
 
-# include <QWidget>
-# include <QTimer>
-# include <QTime>
+#include <QWidget>
+#include <QElapsedTimer>
+#include <QTimer>
 
-# include <body.H>
+#include <body.H>
 
 class Canvas : public QWidget
 {
@@ -13,16 +13,19 @@ class Canvas : public QWidget
 
   QList<Body> body_list;
 
-  QTime time;
-
+  QElapsedTimer elapsed_timer;
   QTimer timer;
 
   bool running;
 
 private slots:
-  void update_time();
+  void step();
 
 protected:
+  void update(float dt);
+
+  void draw(QPainter& painter);
+
   void paintEvent(QPaintEvent *);
 
   void keyPressEvent(QKeyEvent *);
@@ -31,4 +34,4 @@ public:
   explicit Canvas(QWidget * parent = 0);
 };
 
-# endif // CANVAS_H
+#endif // CANVAS_H

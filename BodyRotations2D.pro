@@ -1,7 +1,7 @@
 QT += core widgets
 
 QMAKE_CXX = clang++
-CONFIG += c++14
+CONFIG += c++17
 
 HEADERS += \
     body.H \

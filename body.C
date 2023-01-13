@@ -1,70 +1,68 @@
-# include <body.H>
+#include <body.H>
 
-Body::Body()
-  : parent(nullptr), position(0, 0), color(255, 255, 255), rot_angle(0.0),
-    rot_speed(0.0), rot_angle_respect_parent(0.0),
-    rot_speed_respect_parent(0.0), distance_with_parent(0.0),
-    scale(1.0)
-{
-  // Empty
-}
-
-void Body::add_child(const Body & body)
+void Body::add_child(const Body & body) noexcept
 {
   children_list.push_back(body);
 }
 
-void Body::compute_new_angle(const unsigned long long & dt)
+void Body::update(float dt) noexcept
 {
-  rot_angle += rot_speed * dt / 1000;
+  rot_angle += rot_speed * dt;
 
   if (rot_angle >= 360)
-    rot_angle -= 360;
-}
+    {
+      rot_angle -= 360;
+    }
 
-void Body::compute_new_angle_respect_parent(const unsigned long long & dt)
-{
-  rot_angle_respect_parent += rot_speed_respect_parent * dt / 1000;
+  rot_angle_respect_parent += rot_speed_respect_parent * dt;
 
   if (rot_angle_respect_parent >= 360)
-    rot_angle_respect_parent -= 360;
+    {
+      rot_angle_respect_parent -= 360;
+    }
+
+  for (Body& child : children_list)
+    {
+      child.update(dt);
+    }
 }
 
-void Body::draw(QPainter & painter, const unsigned long long & dt)
+void Body::draw(QPainter& painter) const noexcept
 {
   painter.setBrush(color);
 
-  compute_new_angle(dt);
-  compute_new_angle_respect_parent(dt);
+  QTransform transform_a = painter.transform();
 
-  QMatrix matrix_a = painter.matrix();
+  QTransform transform = transform_a;
 
-  QMatrix matrix = matrix_a;
-
-  if (parent)
+  if (parent != nullptr)
     {
-      matrix.rotate(-rot_angle_respect_parent);
-      matrix.translate(distance_with_parent, 0);
-      matrix.rotate(rot_angle_respect_parent);
+      transform.rotate(-rot_angle_respect_parent);
+      transform.translate(distance_with_parent, 0);
+      transform.rotate(rot_angle_respect_parent);
     }
   else
-    matrix.translate(position.x(), position.y());
+    {
+      transform.translate(position.x(), position.y());
+    }
 
-  matrix.scale(scale, scale);
-  matrix.rotate(rot_angle);
+  transform.scale(scale, scale);
+  transform.rotate(rot_angle);
 
-  painter.setMatrix(matrix);
+  painter.setTransform(transform);
 
   painter.drawEllipse(QPoint(0, 0), 20, 20);
   painter.setPen(Qt::yellow);
   painter.drawLine(QPoint(0, 0), QPoint(30, 0));
 
-  matrix.rotate(-rot_angle);
-  painter.setMatrix(matrix);
+  transform.rotate(-rot_angle);
+  painter.setTransform(transform);
 
-  for (Body & child : children_list)
-    child.draw(painter, dt);
+  for (const Body & child : children_list)
+    {
+      child.draw(painter);
+    }
 
-  painter.setMatrix(matrix_a);
+  painter.setTransform(transform_a);
 }
 
